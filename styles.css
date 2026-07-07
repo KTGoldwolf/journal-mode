@@ -150,8 +150,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .jm-motion {
-    animation: none !important;
+  .jm-motion.jm-motion {
+    animation: none;
   }
 }
 
@@ -194,9 +194,9 @@
 
 /* Alternate static sparkle images for those who don't like too much distracting bling*/
 @media (prefers-reduced-motion: reduce) {
-  .jm-sparkle::before,
-  .jm-sparkle::after {
-    animation: none !important;
+  .jm-sparkle.jm-sparkle::before,
+  .jm-sparkle.jm-sparkle::after {
+    animation: none;
     opacity: 0.9;
   }
 }
