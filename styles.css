@@ -20,6 +20,11 @@
   opacity: 0.4;
 }
 
+/* Settings tab: palette textarea, so hex codes line up in a monospace grid */
+.jm-palette-textarea {
+  font-family: var(--font-monospace);
+}
+
 /* Washi-tape dividers */
 /* A ```washi "code" block renders as this bar. Each tape style is a `.jm-washi--<id>`
   ----

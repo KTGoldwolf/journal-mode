@@ -1,6 +1,6 @@
 {
   "name": "journal-mode",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Style your notes with animations, colors, and washi-tape like dividers for expressive digital journaling.",
   "main": "main.js",
   "scripts": {
@@ -20,7 +20,6 @@
     "@codemirror/view": "^6.0.0",
     "@lezer/common": "^1.0.0",
     "@types/node": "^16.11.6",
-    "builtin-modules": "3.3.0",
     "esbuild": "^0.28.1",
     "obsidian": "latest",
     "tslib": "2.4.0",

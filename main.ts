@@ -233,7 +233,7 @@ export default class JournalModePlugin extends Plugin {
   }
 
   async loadSettings() {
-    const data = await this.loadData();
+    const data = (await this.loadData()) as Partial<JournalModeSettings> | null;
     this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
     if (!this.settings.palette || !Object.keys(this.settings.palette).length) {
       this.settings.palette = { ...DEFAULT_PALETTE };
@@ -443,7 +443,9 @@ function scanStylesheets(re: RegExp): Set<string> {
   for (let i = 0; i < activeDocument.styleSheets.length; i++) {
     try {
       walk(activeDocument.styleSheets[i].cssRules);
-    } catch { }
+    } catch {
+      // Skip cross site origin CSS sheets silently
+    }
   }
   return found;
 }
@@ -531,7 +533,7 @@ class JournalModeSettingTab extends PluginSettingTab {
       .addTextArea((area) => {
         area.setValue(serializePalette(this.plugin.settings.palette));
         area.inputEl.rows = 8;
-        area.inputEl.style.fontFamily = "var(--font-monospace)";
+        area.inputEl.addClass("jm-palette-textarea");
         area.onChange(async (value) => {
           this.plugin.settings.palette = parsePalette(value);
           await this.plugin.saveSettings();
