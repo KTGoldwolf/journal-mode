@@ -1,0 +1,197 @@
+/*
+  LET'S GO JOURNALMODE!
+
+  TIP - If you can't see your change, reload with "Reload app without saving" from the command ribbon!
+
+  Different classes need to be updated to support editing versus reading view.
+  Be sure to update both if you want to see your style in both modes (highly reccomended!)
+
+    - Live Preview / Editing Mode -  `.markdown-source-view`
+    - Reading Mode - `.markdown-preview-view`
+      - and sometimes the wrapper `.markdown-reading-view`
+*/
+
+
+/* Inline styling (color) for tag marup itself, ie {name:…} */
+/* Reading view: span carries an inline color set by the post-processor.
+   Live Preview: the inner text is colored by a CM6 decoration (also inline);
+   here we just dim the `{name:` and `}` delimiters so they stay unobtrusive while you write and think. */
+.cm-editor .jm-color-delim {
+  opacity: 0.4;
+}
+
+/* Washi-tape dividers */
+/* A ```washi "code" block renders as this bar. Each tape style is a `.jm-washi--<id>`
+  ----
+  Edit properties in the block below for global transforms on all washi tape, like 
+  changing the angle or edges. 
+
+  If you want to make all tapes wider, thinner, slightly transparent, etc: This is the spot. 
+*/
+.jm-washi {
+  height: 26px;
+  border-radius: 2px;
+  opacity: 0.92;
+  transform: rotate(-0.6deg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  background-color: #d9c7e8; /* tape not found default color */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 7px, #000 calc(100% - 7px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 7px, #000 calc(100% - 7px), transparent 100%);
+}
+
+/* Adding a New Washi Tape Preset - Tip */
+/* Be sure your tape style starts with `jm-washi` for it to be detected by the command ribbon.
+  You may want to store your own tape styles in your own snippets so that uninstalling or updating 
+  this plugin doesn't accidentally overwrite your work. 
+*/ 
+.jm-washi--candy-stripes {
+  background: repeating-linear-gradient(45deg, #f4a6c0 0 9px, #fbd2e0 9px 18px);
+}
+.jm-washi--mint-dots {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.85) 2.5px, transparent 3px) 0 0 / 13px 13px, #93ddbf;
+}
+.jm-washi--brushed-gold {
+  background: linear-gradient(135deg, #b8902b, #f3e6a8, #caa24a, #9c7b27, #f3e6a8);
+}
+.jm-washi--lavender-gingham {
+  background:
+    repeating-linear-gradient(90deg, rgba(150, 120, 200, 0.45) 0 8px, transparent 8px 16px),
+    repeating-linear-gradient(0deg, rgba(150, 120, 200, 0.45) 0 8px, transparent 8px 16px),
+    #ece3f7;
+}
+.jm-washi--spring-speckles {
+  background:
+    radial-gradient(circle, #ef9a9a 2.5px, transparent 3px) 0 0 / 16px 16px,
+    radial-gradient(circle, #90caf9 2.5px, transparent 3px) 8px 8px / 16px 16px,
+    radial-gradient(circle, #ffe082 2.5px, transparent 3px) 4px 8px / 16px 16px,
+    #fffaf0;
+}
+.jm-washi--ocean {
+  background: repeating-linear-gradient(45deg, #5aa9d6 0 9px, #bfe3f2 9px 18px);
+}
+.jm-washi--sunset {
+  background: linear-gradient(90deg, #f6b26b, #e8849a, #a16ab0);
+}
+
+/* Tapes can be animated as well! Here are some examples. */
+.jm-washi--rainbow-shift {
+  background: linear-gradient(90deg, #f6b26b, #e8849a, #a16ab0);
+  animation: jm-hue-shift 10s linear infinite;
+}
+@keyframes jm-hue-shift {
+  to { filter: hue-rotate(360deg); }
+}
+
+.jm-washi--reds-and-blues {
+  background: repeating-linear-gradient(90deg, #9f1a9c 8px 12px, #4167e9 9px 18px,  #2b3aff 9px 25px);
+  position: relative;
+  overflow: hidden;
+}
+.jm-washi--reds-and-blues::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(3, 142, 245, 0.65) 50%, transparent 60%);
+  transform: translateX(-100%);
+  animation: jm-shine-reds-blues 10s ease-in-out infinite;
+}
+@keyframes jm-shine-reds-blues {
+  to { transform: translateX(100%); }
+}
+
+/* Animated text {name:…} */
+/* If you want to be able to select a new motion from the command ribbon, it needs to be added into
+  main.ts -> MOTIONS[] and recompiled.
+  Otherwise, you can just add anything you want and remember to type the name yourself.
+*/ 
+.jm-motion {
+  display: inline-block;
+  will-change: transform;
+}
+.jm-motion--shiver { animation: jm-shiver 0.5s infinite ease-in-out; }
+.jm-motion--shake  { animation: jm-shake 0.32s infinite ease-in-out; }
+.jm-motion--rage   { animation: jm-rage 0.16s infinite linear; }
+.jm-motion--shock  { animation: jm-shock 0.6s infinite ease-in-out; }
+.jm-motion--wave   { animation: jm-wave 1.8s infinite ease-in-out; }
+
+@keyframes jm-shiver {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(0.4px, -0.4px); }
+  50% { transform: translate(-0.3px, 0.3px); }
+  75% { transform: translate(0.3px, 0.2px); }
+}
+@keyframes jm-shake {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  20% { transform: translate(-1px, 0.6px) rotate(-2deg); }
+  40% { transform: translate(1px, -0.6px) rotate(2deg); }
+  60% { transform: translate(-0.8px, 0.6px) rotate(-1.5deg); }
+  80% { transform: translate(0.8px, -0.4px) rotate(1.5deg); }
+}
+@keyframes jm-rage {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  20% { transform: translate(-2px, 1.2px) rotate(-5deg); }
+  40% { transform: translate(2px, -1.6px) rotate(5deg); }
+  60% { transform: translate(-2px, 1.6px) rotate(-4deg); }
+  80% { transform: translate(2px, -1px) rotate(4deg); }
+}
+@keyframes jm-shock {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  10% { transform: translate(0, -2px) scale(1.12); }
+  22% { transform: translate(0, 0) scale(1); }
+}
+@keyframes jm-wave {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3.5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jm-motion {
+    animation: none !important;
+  }
+}
+
+/* Sparkly text {sparkle:…} */
+.jm-sparkle {
+  position: relative;
+  display: inline-block;
+}
+.jm-sparkle::before,
+.jm-sparkle::after {
+  content: "✦";
+  position: absolute;
+  font-size: 0.55em;
+  line-height: 1;
+  color: #ffd24a;
+  text-shadow: 0 0 3px rgba(255, 200, 60, 0.85);
+  pointer-events: none;
+  opacity: 0;
+  animation-name: jm-sparkle;
+  animation-duration: var(--jm-sparkle-dur, 1.4s);
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-delay: var(--jm-sparkle-delay, 0ms);
+}
+.jm-sparkle::before {
+  top: -0.35em;
+  left: -0.18em;
+}
+.jm-sparkle::after {
+  content: "✧";
+  bottom: -0.28em;
+  right: -0.18em;
+  /* Offset individual sparkles */
+  animation-delay: calc(var(--jm-sparkle-delay, 0ms) - 0.6s);
+}
+@keyframes jm-sparkle {
+  0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1) rotate(90deg); }
+}
+
+/* Alternate static sparkle images for those who don't like too much distracting bling*/
+@media (prefers-reduced-motion: reduce) {
+  .jm-sparkle::before,
+  .jm-sparkle::after {
+    animation: none !important;
+    opacity: 0.9;
+  }
+}

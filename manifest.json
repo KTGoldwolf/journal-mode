@@ -1,0 +1,10 @@
+{
+  "id": "journal-mode",
+  "name": "Journal Mode",
+  "version": "1.0.0",
+  "minAppVersion": "1.10.6",
+  "description": "Style your notes with animations, colors, and washi-tape like dividers for expressive digital journaling.",
+  "author": "Call me KT",
+  "isDesktopOnly": false,
+  "authorUrl": "https://www.kt.codes/"
+}
