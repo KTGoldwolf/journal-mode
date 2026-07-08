@@ -121,3 +121,6 @@ Instead use an Obsidian **CSS snippet**, which belongs to your vault and survive
 4. Back in Obsidian, click the reload icon next to CSS snippets and toggle your snippet **on**.
 
 Your tape now shows up in the `Insert washi divider` picker and works just like the ones that come with Journal Mode — no rebuild or reload required.
+
+### Default Washi Tape Samples
+![Default washi tape samples](docs/washi-tape-samples.jpg)

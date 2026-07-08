@@ -37,7 +37,6 @@
   height: 26px;
   border-radius: 2px;
   opacity: 0.92;
-  transform: rotate(-0.6deg);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
   background-color: #d9c7e8; /* tape not found default color */
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 7px, #000 calc(100% - 7px), transparent 100%);
@@ -58,7 +57,7 @@
 .jm-washi--brushed-gold {
   background: linear-gradient(135deg, #b8902b, #f3e6a8, #caa24a, #9c7b27, #f3e6a8);
 }
-.jm-washi--lavender-gingham {
+.jm-washi--lavender-tablecloth {
   background:
     repeating-linear-gradient(90deg, rgba(150, 120, 200, 0.45) 0 8px, transparent 8px 16px),
     repeating-linear-gradient(0deg, rgba(150, 120, 200, 0.45) 0 8px, transparent 8px 16px),
@@ -71,13 +70,38 @@
     radial-gradient(circle, #ffe082 2.5px, transparent 3px) 4px 8px / 16px 16px,
     #fffaf0;
 }
-.jm-washi--ocean {
-  background: repeating-linear-gradient(45deg, #5aa9d6 0 9px, #bfe3f2 9px 18px);
-}
 .jm-washi--sunset {
   background: linear-gradient(90deg, #f6b26b, #e8849a, #a16ab0);
 }
-
+.jm-washi--green-diamonds {
+  background:
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.25) 0 2px, transparent 2px 14px),
+    repeating-linear-gradient(65deg, rgba(255, 255, 255, 0.25) 0 2px, transparent 2px 14px),
+    linear-gradient(90deg, #6a9b6e, #8fb996);
+}
+.jm-washi--cherry-blossoms {
+  background:
+  radial-gradient(circle at 10% 40%, #fff0f5 0 3px, transparent 4px),
+  radial-gradient(circle at 25% 70%, #fbc9d9 0 4px, transparent 5px),
+  radial-gradient(circle at 45% 25%, #fcabc8 0 3px, transparent 4px),
+  radial-gradient(circle at 65% 65%, #fbc9d9 0 4px, transparent 5px),
+  radial-gradient(circle at 85% 30%, #feebf2 0 3px, transparent 4px),
+  radial-gradient(circle at 9% 0%, #fbc9d9 0 4px, transparent 5px),
+  #f7d9e3;
+  background-size: 40px 40px;
+}
+.jm-washi--blue-jeans {
+  background-color: #4f6f9c;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.08) 0 1px, transparent 1px 4px);
+}
+.jm-washi--gridlines {
+  background-color: #fbfaf5;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(90, 120, 160, 0.35) 0 1px, transparent 1px 10px),
+    repeating-linear-gradient(90deg, rgba(90, 120, 160, 0.35) 0 1px, transparent 1px 10px);
+}
 /* Tapes can be animated as well! Here are some examples. */
 .jm-washi--rainbow-shift {
   background: linear-gradient(90deg, #f6b26b, #e8849a, #a16ab0);
@@ -88,20 +112,9 @@
 }
 
 .jm-washi--reds-and-blues {
-  background: repeating-linear-gradient(90deg, #9f1a9c 8px 12px, #4167e9 9px 18px,  #2b3aff 9px 25px);
+  background: repeating-linear-gradient(90deg, #910cad 8px 13px, #3236cd 9px 18px,  #000b8a 9px 25px);
   position: relative;
   overflow: hidden;
-}
-.jm-washi--reds-and-blues::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(105deg, transparent 40%, rgba(3, 142, 245, 0.65) 50%, transparent 60%);
-  transform: translateX(-100%);
-  animation: jm-shine-reds-blues 10s ease-in-out infinite;
-}
-@keyframes jm-shine-reds-blues {
-  to { transform: translateX(100%); }
 }
 
 /* Animated text {name:…} */

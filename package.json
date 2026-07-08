@@ -1,6 +1,6 @@
 {
   "name": "journal-mode",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Style your notes with animations, colors, and washi-tape like dividers for expressive digital journaling.",
   "main": "main.js",
   "scripts": {
