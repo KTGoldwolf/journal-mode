@@ -7,6 +7,7 @@ import {
   PluginSettingTab,
   Setting,
   type SettingDefinitionItem,
+  type TextAreaComponent,
 } from "obsidian";
 import { syntaxTree } from "@codemirror/language";
 import { SyntaxNode, Tree } from "@lezer/common";
@@ -507,6 +508,8 @@ class JournalModeSettingTab extends PluginSettingTab {
   }
 
   getSettingDefinitions(): SettingDefinitionItem[] {
+    let paletteArea: TextAreaComponent | undefined;
+
     return [
       {
         name: "Hide format tags in editing mode",
@@ -533,6 +536,7 @@ class JournalModeSettingTab extends PluginSettingTab {
               "Unknown names are left as plain text.",
             render: (setting) => {
               setting.addTextArea((area) => {
+                paletteArea = area;
                 area.setValue(serializePalette(this.plugin.settings.palette));
                 area.inputEl.rows = 8;
                 area.inputEl.addClass("jm-palette-textarea");
@@ -548,7 +552,7 @@ class JournalModeSettingTab extends PluginSettingTab {
             action: async () => {
               this.plugin.settings.palette = { ...DEFAULT_PALETTE };
               await this.plugin.saveSettings();
-              this.update();
+              paletteArea?.setValue(serializePalette(this.plugin.settings.palette));
             },
           },
         ],
