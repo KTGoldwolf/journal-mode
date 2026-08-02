@@ -1,22 +1,54 @@
 name: Release Obsidian plugin
 
 on:
-  push:
-    tags:
-      - "*.*.*"
   workflow_dispatch:
+    inputs:
+      bump:
+        description: Version increment
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      release_title:
+        description: Release title (defaults to the version number)
+        required: false
+        type: string
+      release_notes:
+        description: Patch notes (optional; generated notes are appended)
+        required: false
+        type: string
 
 permissions:
   contents: write
   id-token: write
   attestations: write
 
+# Only one release may choose and publish a version at a time.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      - name: Require the default branch
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          SELECTED_BRANCH: ${{ github.ref_name }}
+        run: |
+          if [ "$SELECTED_BRANCH" != "$DEFAULT_BRANCH" ]; then
+            echo "::error::Run releases from the default branch ('$DEFAULT_BRANCH'), not '$SELECTED_BRANCH'."
+            exit 1
+          fi
+
       - name: Check out
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -27,19 +59,76 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Determine version
+      - name: Choose version
         id: version
+        env:
+          BUMP: ${{ inputs.bump }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION="$(node -p "require('./manifest.json').version")"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          # On a tag push, the tag must match manifest.json exactly.
-          if [ "$GITHUB_EVENT_NAME" = "push" ] && [ "$GITHUB_REF_NAME" != "$VERSION" ]; then
-            echo "::error::Tag '$GITHUB_REF_NAME' does not match manifest.json version '$VERSION'."
+          CURRENT_VERSION="$(node -p "require('./manifest.json').version")"
+          SHOULD_BUMP=true
+
+          # If a previous attempt updated the files but did not publish the
+          # release, retry that version instead of skipping to another one.
+          if ! gh release view "$CURRENT_VERSION" >/dev/null 2>&1; then
+            if ! REMOTE_TAG="$(git ls-remote --tags origin "refs/tags/$CURRENT_VERSION")"; then
+              SHOULD_BUMP=false
+            elif [ -z "$REMOTE_TAG" ]; then
+              SHOULD_BUMP=false
+            elif [ "${REMOTE_TAG%%[[:space:]]*}" = "$(git rev-parse HEAD)" ]; then
+              SHOULD_BUMP=false
+            fi
+          fi
+
+          if [ "$SHOULD_BUMP" = true ]; then
+            VERSION="$(node scripts/bump-version.mjs "$BUMP")"
+          else
+            VERSION="$CURRENT_VERSION"
+            echo "Retrying unpublished version $VERSION."
+          fi
+
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            echo "::error::Release '$VERSION' already exists."
             exit 1
           fi
 
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Preparing release $VERSION."
+
       - name: Build
         run: npm run build
+
+      - name: Commit version files
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if ! git diff --quiet -- package.json package-lock.json manifest.json versions.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add package.json package-lock.json manifest.json versions.json
+            git commit -m "chore: release $VERSION"
+            git push origin "HEAD:$DEFAULT_BRANCH"
+          fi
+
+          echo "RELEASE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Create tag
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          REMOTE_TAG="$(git ls-remote --tags origin "refs/tags/$VERSION")"
+          if [ -n "$REMOTE_TAG" ]; then
+            TAG_SHA="${REMOTE_TAG%%[[:space:]]*}"
+            if [ "$TAG_SHA" != "$RELEASE_SHA" ]; then
+              echo "::error::Tag '$VERSION' already points to $TAG_SHA instead of $RELEASE_SHA."
+              exit 1
+            fi
+            echo "Tag $VERSION already points to the release commit; reusing it."
+          else
+            git tag "$VERSION" "$RELEASE_SHA"
+            git push origin "refs/tags/$VERSION"
+          fi
 
       - name: Attest build provenance
         uses: actions/attest-build-provenance@v2
@@ -51,12 +140,21 @@ jobs:
 
       - name: Create the GitHub Release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_NOTES: ${{ inputs.release_notes }}
+          RELEASE_TITLE: ${{ inputs.release_title }}
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          # --target pins the tag to the exact commit we built and attested.
-          gh release create "$VERSION" \
-            --target "$GITHUB_SHA" \
-            --title "$VERSION" \
-            --generate-notes \
-            main.js manifest.json styles.css
+          TITLE="${RELEASE_TITLE:-$VERSION}"
+          RELEASE_ARGS=(
+            "$VERSION"
+            --verify-tag
+            --title "$TITLE"
+            --generate-notes
+          )
+
+          if [ -n "$RELEASE_NOTES" ]; then
+            RELEASE_ARGS+=(--notes "$RELEASE_NOTES")
+          fi
+
+          gh release create "${RELEASE_ARGS[@]}" main.js manifest.json styles.css
