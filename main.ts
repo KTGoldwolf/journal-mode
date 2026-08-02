@@ -6,6 +6,7 @@ import {
   Plugin,
   PluginSettingTab,
   Setting,
+  type SettingDefinitionItem,
 } from "obsidian";
 import { syntaxTree } from "@codemirror/language";
 import { SyntaxNode, Tree } from "@lezer/common";
@@ -76,7 +77,7 @@ const DEFAULT_SETTINGS: JournalModeSettings = {
 };
 
 export default class JournalModePlugin extends Plugin {
-  settings: JournalModeSettings;
+  settings!: JournalModeSettings;
 
   async onload() {
     await this.loadSettings();
@@ -503,6 +504,56 @@ class StringSuggestModal extends FuzzySuggestModal<string> {
 class JournalModeSettingTab extends PluginSettingTab {
   constructor(app: App, private plugin: JournalModePlugin) {
     super(app, plugin);
+  }
+
+  getSettingDefinitions(): SettingDefinitionItem[] {
+    return [
+      {
+        name: "Hide format tags in editing mode",
+        desc:
+          "Hide the {tag: …} delimiters while editing, revealing them only when the " +
+          "cursor is inside — like Markdown's ** markers.",
+        render: (setting) => {
+          setting.addToggle((toggle) =>
+            toggle.setValue(this.plugin.settings.hideTagsInEditMode).onChange(async (value) => {
+              this.plugin.settings.hideTagsInEditMode = value;
+              await this.plugin.saveSettings();
+            })
+          );
+        },
+      },
+      {
+        type: "group",
+        heading: "Colors",
+        items: [
+          {
+            name: "Palette",
+            desc:
+              "One color per line as `name #hex`. Use a name in a note like {sea: words}. " +
+              "Unknown names are left as plain text.",
+            render: (setting) => {
+              setting.addTextArea((area) => {
+                area.setValue(serializePalette(this.plugin.settings.palette));
+                area.inputEl.rows = 8;
+                area.inputEl.addClass("jm-palette-textarea");
+                area.onChange(async (value) => {
+                  this.plugin.settings.palette = parsePalette(value);
+                  await this.plugin.saveSettings();
+                });
+              });
+            },
+          },
+          {
+            name: "Reset palette to defaults",
+            action: async () => {
+              this.plugin.settings.palette = { ...DEFAULT_PALETTE };
+              await this.plugin.saveSettings();
+              this.update();
+            },
+          },
+        ],
+      },
+    ];
   }
 
   display(): void {
