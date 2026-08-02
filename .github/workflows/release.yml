@@ -13,7 +13,7 @@ on:
           - minor
           - major
       release_title:
-        description: Release title (defaults to the version number)
+        description: Title text after the version number (optional)
         required: false
         type: string
       release_notes:
@@ -145,7 +145,12 @@ jobs:
           RELEASE_TITLE: ${{ inputs.release_title }}
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          TITLE="${RELEASE_TITLE:-$VERSION}"
+          if [ -n "$RELEASE_TITLE" ]; then
+            TITLE="$VERSION - $RELEASE_TITLE"
+          else
+            TITLE="$VERSION"
+          fi
+
           RELEASE_ARGS=(
             "$VERSION"
             --verify-tag
