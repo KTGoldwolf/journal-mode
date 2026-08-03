@@ -211,7 +211,9 @@ export default class JournalModePlugin extends Plugin {
     for (const textNode of textNodes) {
       const text = textNode.nodeValue ?? "";
       re.lastIndex = 0;
-      const frag = doc.createDocumentFragment();
+      const frag = (
+        doc.win as Window & { createFragment(): DocumentFragment }
+      ).createFragment();
       let lastIndex = 0;
       let changed = false;
       let match: RegExpExecArray | null;
@@ -222,7 +224,7 @@ export default class JournalModePlugin extends Plugin {
         if (match.index > lastIndex) {
           frag.appendChild(doc.createTextNode(text.slice(lastIndex, match.index)));
         }
-        appendStyledContent(frag, match[2], spec, doc);
+        appendStyledContent(frag, match[2], spec);
         lastIndex = match.index + match[0].length;
       }
       if (changed) {
@@ -383,33 +385,27 @@ function motionDelay(motion: string, i: number): string {
   return `-${(i % 6) * 50}ms`;
 }
 
-function colorSpan(doc: Document, text: string, hex: string): HTMLSpanElement {
-  const span = doc.createElement("span");
-  span.className = "jm-color";
+function appendColorSpan(parent: Node, text: string, hex: string): void {
+  const span = parent.createSpan({ cls: "jm-color", text });
   span.style.color = hex;
-  span.textContent = text;
-  return span;
 }
 
-function appendStyledContent(frag: DocumentFragment, content: string, spec: TagSpec, doc: Document) {
+function appendStyledContent(frag: DocumentFragment, content: string, spec: TagSpec) {
   const perLetter = spec.motion !== null || spec.sparkle || spec.color?.rainbow === true;
   if (!perLetter) {
-    if (spec.color && !spec.color.rainbow) frag.appendChild(colorSpan(doc, content, spec.color.hex));
-    else frag.appendChild(doc.createTextNode(content));
+    if (spec.color && !spec.color.rainbow) appendColorSpan(frag, content, spec.color.hex);
+    else frag.appendText(content);
     return;
   }
   let i = 0;
   for (const ch of content) {
     if (/\s/.test(ch)) {
-      frag.appendChild(doc.createTextNode(ch));
+      frag.appendText(ch);
       continue;
     }
     const { className, style } = letterStyle(spec, i);
-    const span = doc.createElement("span");
-    span.className = className;
+    const span = frag.createSpan({ cls: className, text: ch });
     span.style.cssText = style;
-    span.textContent = ch;
-    frag.appendChild(span);
     i++;
   }
 }
@@ -549,10 +545,10 @@ class JournalModeSettingTab extends PluginSettingTab {
           },
           {
             name: "Reset palette to defaults",
-            action: async () => {
+            action: () => {
               this.plugin.settings.palette = { ...DEFAULT_PALETTE };
-              await this.plugin.saveSettings();
               paletteArea?.setValue(serializePalette(this.plugin.settings.palette));
+              void this.plugin.saveSettings();
             },
           },
         ],
